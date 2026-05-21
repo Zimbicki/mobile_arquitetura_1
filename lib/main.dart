@@ -3,11 +3,19 @@ import 'package:provider/provider.dart';
 import 'controllers/product_controller.dart';
 import 'repositories/product_repository.dart';
 import 'screens/product_list_page.dart';
+import 'screens/login_page.dart';
+import 'services/session_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  final sessionService = SessionService();
+  await sessionService.loadSession();
+
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: sessionService),
         ChangeNotifierProvider(
           create: (_) => ProductController(ProductRepository()),
         ),
@@ -22,6 +30,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sessionService = Provider.of<SessionService>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Catálogo Otimizado',
@@ -29,7 +39,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const ProductListPage(),
+      home: sessionService.isAuthenticated ? const ProductListPage() : const LoginPage(),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../controllers/product_controller.dart';
+import '../services/session_service.dart';
+import 'login_page.dart';
 import 'product_detail_page.dart';
 
 class ProductListPage extends StatefulWidget {
@@ -32,13 +34,45 @@ class _ProductListPageState extends State<ProductListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final sessionService = Provider.of<SessionService>(context);
+    final user = sessionService.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catálogo Otimizado'),
+        title: Row(
+          children: [
+            if (user != null && user.image.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(user.image),
+                  radius: 18,
+                ),
+              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Catálogo Otimizado', style: TextStyle(fontSize: 16)),
+                if (user != null)
+                  Text('Olá, ${user.firstName}', style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             onPressed: () => context.read<ProductController>().loadProducts(forceRefresh: true),
             icon: const Icon(Icons.refresh),
+          ),
+          IconButton(
+            onPressed: () async {
+              await sessionService.clearSession();
+              if (!context.mounted) return;
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),

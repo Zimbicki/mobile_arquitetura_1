@@ -19,4 +19,15 @@ class ProductRepository {
         .map((item) => Product.fromMap(item as Map<String, dynamic>))
         .toList();
   }
+
+  Future<Product> fetchProductById(int id) async {
+    final response = await http.get(Uri.parse('$_baseUrl/$id'));
+
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao buscar produto');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    return Product.fromMap(data);
+  }
 }
