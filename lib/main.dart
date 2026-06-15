@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'controllers/product_controller.dart';
+import 'controllers/favorite_controller.dart';
 import 'repositories/product_repository.dart';
 import 'screens/product_list_page.dart';
 import 'screens/login_page.dart';
@@ -12,6 +13,9 @@ void main() async {
   final sessionService = SessionService();
   await sessionService.loadSession();
 
+  final favoriteController = FavoriteController();
+  await favoriteController.loadFavorites();
+
   runApp(
     MultiProvider(
       providers: [
@@ -19,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => ProductController(ProductRepository()),
         ),
+        ChangeNotifierProvider.value(value: favoriteController),
       ],
       child: const MyApp(),
     ),

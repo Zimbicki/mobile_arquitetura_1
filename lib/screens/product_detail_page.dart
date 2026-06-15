@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../models/product.dart';
+import '../controllers/favorite_controller.dart';
 import '../repositories/product_repository.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -26,6 +28,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product.title),
+        actions: [
+          Consumer<FavoriteController>(
+            builder: (context, favController, _) {
+              final isFav = favController.isFavorite(widget.product.id);
+              return IconButton(
+                icon: Icon(
+                  isFav ? Icons.favorite : Icons.favorite_border,
+                  color: isFav ? Colors.red : null,
+                ),
+                onPressed: () => favController.toggleFavorite(widget.product.id),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<Product>(
         future: _productFuture,
@@ -106,3 +122,4 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 }
+

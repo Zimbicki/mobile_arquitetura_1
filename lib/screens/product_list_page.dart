@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../controllers/product_controller.dart';
+import '../controllers/favorite_controller.dart';
 import '../services/session_service.dart';
 import 'login_page.dart';
 import 'product_detail_page.dart';
@@ -114,38 +115,50 @@ class _ProductListPageState extends State<ProductListPage> {
               itemBuilder: (context, index) {
                 final product = controller.products[index];
 
-                return ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: CachedNetworkImage(
-                      imageUrl: product.thumbnail,
-                      width: 72,
-                      height: 72,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        width: 72, height: 72, color: Colors.grey.shade200,
-                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                return Consumer<FavoriteController>(
+                  builder: (context, favController, _) {
+                    final isFav = favController.isFavorite(product.id);
+                    return ListTile(
+                      contentPadding: const EdgeInsets.all(12),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: product.thumbnail,
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            width: 72, height: 72, color: Colors.grey.shade200,
+                            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            width: 72,
+                            height: 72,
+                            color: Colors.grey.shade300,
+                            child: const Icon(Icons.broken_image),
+                          ),
+                        ),
                       ),
-                      errorWidget: (context, url, error) => Container(
-                        width: 72,
-                        height: 72,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.broken_image),
+                      title: Text(
+                        product.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ),
-                  title: Text(
-                    product.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '${product.category} • R\$ ${product.price.toStringAsFixed(2)}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onTap: () => openDetails(context, product),
+                      subtitle: Text(
+                        '${product.category} • R\$ ${product.price.toStringAsFixed(2)}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: isFav ? Colors.red : null,
+                        ),
+                        onPressed: () => favController.toggleFavorite(product.id),
+                      ),
+                      onTap: () => openDetails(context, product),
+                    );
+                  },
                 );
               },
             ),
@@ -155,3 +168,4 @@ class _ProductListPageState extends State<ProductListPage> {
     );
   }
 }
+
