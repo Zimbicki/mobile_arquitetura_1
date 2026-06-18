@@ -1,69 +1,91 @@
-# Flutter Problemático - Catálogo com Latência e Sem Cache
+# Mobile Arquitetura 01 — Catálogo de Produtos Flutter
 
-Projeto didático propositalmente ruim para identificação e correção de problemas de:
+Projeto Flutter desenvolvido como entrega da **Atividade 12 — Autenticação e Troca de API**, consistindo na análise e evolução de uma aplicação Flutter com problemas intencionais de latência, responsividade e ausência de cache.
 
-- latência percebida
-- baixa responsividade
-- ausência de cache de dados
-- ausência de cache explícito de imagens
-- acoplamento entre UI e infraestrutura
-- recarregamento desnecessário
+## Sobre o Projeto
 
-## API usada
+Este repositório contém a versão **evoluída** da aplicação, com correções arquiteturais e melhorias de experiência do usuário. O projeto original apresentava problemas como: acoplamento entre UI e infraestrutura, latência artificial, ausência de cache de imagens e recarregamento desnecessário.
 
-Este projeto consome a API pública DummyJSON:
-- `GET https://dummyjson.com/products`
+## Funcionalidades
 
-## Como executar
+- **Autenticação** — Login com validação de campos e tratamento de erros via API DummyJSON
+- **Sessão persistente** — Sessão do usuário mantida entre sessões do app via SharedPreferences
+- **Bloqueio sem login** — Acesso à tela de produtos bloqueado para usuários não autenticados
+- **Catálogo de produtos** — Listagem com título, preço, categoria e imagem (thumbnail)
+- **Detalhes do produto** — Tela com nome, preço, descrição, avaliação e galeria de imagens
+- **Sistema de favoritos** — Marcar/desmarcar produtos como favoritos com persistência local
+- **Logout** — Encerramento da sessão com redirecionamento para tela de login
+- **Cache de imagens** — Armazenamento em disco via `cached_network_image`
+- **Pull-to-refresh** — Atualização da lista sem bloquear a interface
+
+## API Utilizada
+
+O projeto consome a API pública [DummyJSON](https://dummyjson.com):
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/auth/login` | POST | Autenticação de usuário |
+| `/products` | GET | Listagem de produtos |
+| `/products/{id}` | GET | Detalhes de um produto |
+
+## Arquitetura
+
+O projeto segue o padrão **MVC + Repository** com gerenciamento de estado via **Provider**:
+
+```
+lib/
+├── main.dart                          # Ponto de entrada e configuração do MultiProvider
+├── models/
+│   ├── product.dart                   # Modelo de dados Product
+│   └── user.dart                      # Modelo de dados User
+├── repositories/
+│   ├── auth_repository.dart           # Chamadas à API de autenticação
+│   └── product_repository.dart        # Chamadas à API de produtos
+├── controllers/
+│   ├── product_controller.dart        # Estado e lógica da listagem de produtos
+│   └── favorite_controller.dart       # Estado e lógica de favoritos
+├── services/
+│   └── session_service.dart           # Gerenciamento de sessão do usuário
+└── screens/
+    ├── login_page.dart                # Tela de login
+    ├── product_list_page.dart         # Tela principal com lista de produtos
+    └── product_detail_page.dart       # Tela de detalhes do produto
+```
+
+## Justificativa do Provider
+
+O **Provider** foi escolhido como gerenciador de estado por ser a recomendação oficial do Flutter para projetos de pequeno e médio porte. Entre os motivos:
+
+- Simplicidade e baixa curva de aprendizado utilizando `ChangeNotifier`
+- Integração nativa com o ciclo de vida dos Widgets
+- Baixo boilerplate comparado ao BLoC
+- Reatividade granular com `Consumer<T>`
+- Adequação ao escopo do projeto
+
+A justificativa completa está disponível no arquivo [DOCUMENTACAO.md](DOCUMENTACAO.md).
+
+## Dependências
+
+| Pacote | Versão | Finalidade |
+|--------|--------|------------|
+| `http` | ^1.2.1 | Requisições HTTP à API |
+| `provider` | ^6.1.2 | Gerenciamento de estado |
+| `cached_network_image` | ^3.3.1 | Cache de imagens em disco |
+| `shared_preferences` | ^2.2.3 | Persistência local (sessão e favoritos) |
+
+## Como Executar
 
 ```bash
 flutter pub get
 flutter run
 ```
----
 
-# Atividade Prática: Análise e Evolução de Aplicação Flutter
+### Credenciais de teste (API DummyJSON)
 
-Esta atividade propõe a análise de um projeto Flutter construído propositalmente com limitações arquiteturais e problemas de comportamento relacionados a **latência**, **responsividade** e **ausência de estratégias adequadas de cache**.
+| Usuário | Senha |
+|---------|-------|
+| `emilys` | `emilyspass` |
 
-A proposta consiste em examinar o sistema, identificar os problemas existentes e desenvolver uma versão estruturalmente mais adequada, justificando tecnicamente as decisões adotadas ao longo da evolução da aplicação.
+## Documentação
 
-## Acesso ao Projeto
-
-O projeto-base da atividade está disponível neste repositório.
-
-A partir dele, deve-se observar o comportamento da aplicação, analisar suas limitações e realizar as modificações consideradas necessárias.
-
-## Objetivo da Atividade
-
-O foco da atividade está em compreender que a qualidade de uma aplicação não depende apenas de seu funcionamento correto, mas também de sua organização interna e de sua forma de responder às interações do usuário.
-
-Assim, a proposta não se limita a fazer o sistema “funcionar”, mas a examinar **como ele se comporta**, quais decisões prejudicam sua qualidade e quais mudanças podem torná-lo mais adequado do ponto de vista arquitetural e da experiência de uso.
-
-## Proposta de Trabalho
-
-Ao realizar esta atividade, espera-se que sejam desenvolvidas as seguintes ações:
-
-1. Executar o projeto original e observar seu comportamento em uso.
-2. Identificar os problemas arquiteturais e funcionais presentes na aplicação.
-3. Registrar quais limitações afetam latência, responsividade, organização do código e experiência do usuário.
-4. Evoluir o projeto para uma versão mais adequada.
-5. Descrever com clareza as mudanças realizadas.
-6. Justificar tecnicamente por que essas mudanças melhoram o sistema.
-7. Apresentar o resultado final de forma organizada.
-
-## Resultado Esperado
-
-Como resultado, espera-se uma versão modificada da aplicação acompanhada de uma análise objetiva dos problemas encontrados, de uma descrição das mudanças implementadas e de uma justificativa técnica que relacione cada alteração aos problemas identificados no projeto original.
-
-## Critério Central de Análise
-
-A análise da atividade deve considerar principalmente a capacidade de:
-
-* compreender os problemas existentes no projeto original;
-* reconhecer impactos arquiteturais e de experiência do usuário;
-* propor e implementar melhorias coerentes;
-* explicar tecnicamente as mudanças realizadas.
-
-> Esta atividade não se limita à implementação de código. Seu propósito é desenvolver análise, diagnóstico, evolução arquitetural e argumentação técnica sobre decisões de projeto em aplicações interativas.
-
+A análise completa dos problemas identificados, as mudanças realizadas e a justificativa técnica de cada decisão estão detalhadas no arquivo [DOCUMENTACAO.md](DOCUMENTACAO.md).
